@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="space_shooter.css">
+    <title>Document</title>
+</head>
+
+
+<body class="flex">
+    <section id="playground">
+
+
+    </section>
+    <script>
+
+        //Es soll eine function erstellt werden, in der alle Elemente gleichzeitg abgedatet werden. 
+        //Die Objekte werden erstellt und bekommen einen neuen Wert um sich zu bewegen. 
+        let array_random_speed = [0.2, 0.3, 0.4, 0.5, 0.55, 0.65, 0.6, 0.7, 0.8, 0.9];
+        let counter_points = 0; 
+        let counter_bullets = 30; 
+
+        class Bullet {
+            constructor(array_bullets) {
+                this.array_bullets = array_bullets;
+                this.bullet = document.createElement('div');
+                this.bullet.className = 'bullet';
+                //offset steht für Versatz
+                this.playground = document.getElementById('playground');
+                this.shooter = document.getElementById('shooter');
+                this.bullet.style.left = shooter.offsetLeft + (0.5 * this.shooter.offsetWidth) - (5 * 0.5) + 'px';
+                this.bullet.style.top = shooter.offsetTop + 'px';
+                this.speed = 5;
+                this.top = 0;
+                this.playground.appendChild(this.bullet);
+            }
+
+            move_bullet() {
+                this.top = this.bullet.offsetTop;
+                this.top = this.top-this.speed;
+                // alert(this.top); 
+                this.bullet.style.top = this.top + 'px';
+            }
+            
+        }
+
+        class Shooter {
+            constructor(id_shooter, speed) {
+                this.shooter = document.createElement('div');
+                this.shooter.id = id_shooter;
+                this.playground = document.getElementById('playground');
+                this.playground.appendChild(this.shooter);
+                this.x = 0;
+                this.speed = speed; 
+                this.y = 0;
+                this.arrow_up = false;
+                this.arrow_down = false;
+                this.arrow_left = false;
+                this.arrow_right = false;
+                this.is_shooting = false; 
+                }
+            move_shooter() {
+                this.x = this.shooter.offsetLeft;
+                this.y = this.shooter.offsetTop;
+                if (this.arrow_up && this.shooter.offsetTop > 0) {
+                    this.y -= this.speed;
+                    this.shooter.style.top = this.y + 'px';
+                }
+                if (this.arrow_down && this.shooter.offsetTop < (this.shooter.offsetParent.offsetHeight - this.shooter.offsetHeight)) {
+                    this.y += this.speed;
+                    this.shooter.style.top = this.y + 'px';
+                }
+                if (this.arrow_left && this.shooter.offsetLeft > 0) {
+                    this.x -= this.speed;
+                    this.shooter.style.left = this.x + 'px';
+                }
+                if (this.arrow_right && this.shooter.offsetLeft < (this.shooter.offsetParent.offsetWidth - this.shooter.offsetWidth)) {
+                    this.x += this.speed;
+                    this.shooter.style.left = this.x + 'px';
+                }
+
+            }
+            shoot(){
+                if (counter_bullets === 30 && this.is_shooting === true) {
+                    array_bullets.push(new Bullet(array_bullets));
+                    counter_bullets = 0; 
+                }
+
+            }
+            
+        }
+
+        class Moving_Rock {
+            constructor(id_playground, array_moving_rocks, update_value, array_random_speed) {
+                this.array_random_speed = array_random_speed;
+                this.array_moving_rocks = array_moving_rocks;
+                this.update_value = update_value;
+                this.item = document.createElement('div');
+                this.vertical_pos_item = 0;
+                this.horizontal_position = 0;
+                this.playground = document.getElementById(id_playground);
+                this.destroyed = false;
+                this.index_speed = Math.round(Math.random() * 10);
+                this.random_speed = this.array_random_speed[this.index_speed];
+                this.first_direction = Math.random();
+                this.playground_width = playground.offsetWidth;
+                this.create_item();
+            }
+            
+            create_item() {
+                this.item.className = 'item';
+                playground.appendChild(this.item);
+                this.horizontal_position = this.playground_width - Math.round(Math.random() * this.playground_width) - this.item.offsetWidth;
+                if (this.horizontal_position < 0) {
+                    this.horizontal_position = 0;
+                }
+                this.item.style.left = this.horizontal_position + 'px';
+                this.item.style.top = this.vertical_pos_item + 'px';
+                this.vertical_pos_item -= this.item.offsetHeight;
+            }
+
+            delete_moving_Rock() {
+
+            }
+            move_item() {
+                this.vertical_pos_item += this.random_speed;
+                this.item.style.top = this.vertical_pos_item + 'px';
+                if (this.first_direction > 0.5) this.horizontal_position += this.random_speed;
+                if (this.first_direction <= 0.5) this.horizontal_position -= this.random_speed;
+                if (this.horizontal_position <= 0) this.first_direction = 0.6;
+                if (this.horizontal_position >= this.playground_width - this.item.offsetWidth) this.first_direction = 0.4;
+                if (this.horizontal_position <= 0) this.horizontal_position += 0.4;
+                this.item.style.left = this.horizontal_position + 'px';
+            }
+        }
+        let array_moving_rocks = [];
+        let array_bullets = [];
+        let first_item = new Moving_Rock('playground', array_moving_rocks, 1, array_random_speed);
+        let second_item = new Moving_Rock('playground', array_moving_rocks, 1, array_random_speed);
+        let third_item = new Moving_Rock('playground', array_moving_rocks, 1, array_random_speed);
+        let fourth_item = new Moving_Rock('playground', array_moving_rocks, 1, array_random_speed);
+        let first_shooter = new Shooter('shooter', 4);
+
+        
+        document.addEventListener('keydown', (e) => {
+            e.preventDefault();
+            if (e.key === " ") first_shooter.is_shooting = true;  
+            if (e.key === 'ArrowUp') first_shooter.arrow_up = true;
+            if (e.key === 'ArrowDown') first_shooter.arrow_down = true;
+            if (e.key === 'ArrowLeft') first_shooter.arrow_left = true;
+            if (e.key === 'ArrowRight') first_shooter.arrow_right = true;
+        });
+        document.addEventListener('keyup', (e) => {
+            e.preventDefault();
+            if (e.key === ' ') first_shooter.is_shooting = false;
+            if (e.key === 'ArrowUp') first_shooter.arrow_up = false;
+            if (e.key === 'ArrowDown') first_shooter.arrow_down = false;
+            if (e.key === 'ArrowLeft') first_shooter.arrow_left = false;
+            if (e.key === 'ArrowRight') first_shooter.arrow_right = false;
+        });
+
+        function main_Loop() {
+            first_item.move_item();
+            second_item.move_item();
+            third_item.move_item();
+            fourth_item.move_item();
+            first_shooter.move_shooter();
+            first_shooter.shoot(); 
+            counter_bullets++;
+            if(counter_bullets > 30) counter_bullets = 30;  
+            requestAnimationFrame(main_Loop);
+            array_bullets.forEach((instanceBullet) => {
+                instanceBullet.move_bullet();
+            })
+        }
+        main_Loop();
+    
+    
+    
+    // class Moving_Rock  { //Deklaration der Klasse
+    //     constructor (){
+    //         this.color = 'green'; 
+    //     }
+    //     move(){
+
+    //     }
+    // }//ENDE der Klasse
+    
+    // let first_Rock = new Moving_Rock(); //Instanz der Klasse initialisieren
+    
+
+    // function main_Loop(){
+    //     first_Rock.move(); 
+    //     //Callback-Functions haben ein eigenes This. Somit würde das this aus der Klasse 
+    //     //auf die Funktion verweisen und nicht 
+    //     //mehr auf die Instanz. Das würde die Fehlermeldung this is undefined erzeugen. 
+    //     requestAnimationFrame(()=> { //Die Arrow-function hat kein eigenes this. 
+    //         //Darum muss die Callback-Function als Arrow_Function ausgeführt werden. 
+
+    //         main_Loop(); 
+    //     }); 
+
+    // }
+
+    // main_loop(); 
+        
+    </script>
+</body>
+
+
+</html>

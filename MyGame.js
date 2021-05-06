@@ -5,7 +5,7 @@ var Entitys = [];
 //GLOBALS
 var IS_CHROME = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 var PlayerImg = 'data:image/jpg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAMCAgICAgICAgICAgICAggCAgICAgoHBwYIAgoCAgIKAgICAgYFAgIFAgICBQoFBQcICQkJAgMLDAoIDAYICQgBAwQEAgICCQICCQgCAgIICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICP/AABEIAIAAgAMBEQACEQEDEQH/xAAVAAEBAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AlUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//2Q==';
-var PlayerStartPos = [0,0];
+var PlayerStartPos = [0, 0];
 
 class Pos {
     constructor(X, Y) {
@@ -43,7 +43,6 @@ class Bullet {
 
 class Player {
     constructor(base64Skin, X, Y) {
-        this.Name = Name;
         this.skin = base64Skin;
         this.Pos = new Pos(X, Y);
     }
@@ -54,7 +53,17 @@ class Entity {
 }
 
 CreatePlayer = () => {
-    Players = new Player(playerImg, PlayerStartPos[0], PlayerStartPos[1])
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    if (h > w) {
+        PlayerStartPos[0] = w / 2;
+    } else {
+        PlayerStartPos[0] = h / 2;
+    }
+    PlayerStartPos[1] = 10
+
+    Players = new Player(PlayerImg, PlayerStartPos[0], PlayerStartPos[1])
+    console.table(Players)
 }
 
 var Resize = setInterval(() => {
@@ -70,17 +79,40 @@ var Resize = setInterval(() => {
         GameArea.css("height", h + 'px');
         GameArea.css("width", h + 'px');
     }
-    resize();
 }, 1000);
 
 init = () => {
-    resize();
     CreatePlayer();
 }
 
 
+$(window).keydown(Key => {
+    KeyCode = Key.keyCode;
+    var KeyPress = (KeyCode == 32) ? "Space" : (KeyCode == 37 || KeyCode == 65) ? "ArrLeft" : (KeyCode == 39|| KeyCode == 68) ? "ArrRight" :(KeyCode == 38|| KeyCode == 87) ? "ArrUp" :(KeyCode == 83|| KeyCode == 40) ? "ArrDown" : "XXX";
+    if (KeyPress == "XXX") {
+        console.log("Unknown key")
+        console.log(Key.keyCode);
+        return;
+    }
+    console.log(KeyPress)
+    if (KeyPress == "Space") {
+        //Shoot
+    }
+    if (KeyPress == "ArrLeft") {
+        //MoveLeft
+    }
+    if (KeyPress == "ArrRight") {
+        //MoveRight
+    }
+    if (KeyPress == "ArrUp") {
+        //MoveUp
+    }
+    if (KeyPress == "ArrDown") {
+        //MoveDown
+    }
+})
+
 window.onload = () => {
     init();
-    console.table(new Pos(PlayerStartPos[0], PlayerStartPos[1]))
     //Animate();
 }
