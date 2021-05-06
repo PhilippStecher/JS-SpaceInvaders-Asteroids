@@ -1,7 +1,36 @@
 //GLOBALS
 var IS_CHROME = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-var array_random_speed = [0.2, 0.3, 0.4, 0.5, 0.55, 0.65, 0.6, 0.7, 0.8, 0.9];
-var LVL = 1;
+var RandomRockSpeed = [0.2, 0.3, 0.4, 0.5, 0.55, 0.65, 0.6, 0.7, 0.8, 0.9];
+var RockSpawns = [[0, 0], [0, 0]];
+var LVL = 0;
+var SpeedForLVL = [4, 6, 8, 10];
+
+Arraycutout = (array, WholeRockObj) => {
+    var returnarray = [];
+    for (var x = 0; x < array.length; x++) {
+        if (array[x] != WholeRockObj) {
+            returnarray.push(array[x])
+        }
+    }
+    return returnarray;
+
+    return false;
+
+};
+
+function randomString(length) {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-*/';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
+function randomNumber(min, max) {
+    return Math.random() * (max - min) + min;
+}
 
 class Pos {
     constructor(X, Y) {
@@ -23,7 +52,6 @@ class Score {
         this.HTMLscore.className = "flex"
 
     }
-
     UpdateScore(Points) {
         this.PlayerScore = this.PlayerScore + Points
     }
@@ -36,6 +64,7 @@ var BulletCooldown = 30;
 var BulledCooldownWanted = 30;
 class Bullet {
     constructor(BulletsArr) {
+        this.Pos = new Pos(ThePlayer.Pos.X, ThePlayer.Pos.Y)
         this.BulletsArr = BulletsArr;
         this.bullet = document.createElement('div');
         this.bullet.className = 'bullet';
@@ -45,14 +74,13 @@ class Bullet {
 
         this.speed = BulletSpeed;
 
-        this.top = ThePlayer.Pos.Y;
         this.playground = document.getElementById('gameArea');
         this.playground.appendChild(this.bullet);
     }
 
-    move_bullet() {
-        this.top = this.top - this.speed;
-        this.bullet.style.top = this.top + 'px';
+    Move() {
+        this.Pos.Y = this.Pos.Y - this.speed;
+        this.bullet.style.top = this.Pos.Y + 'px';
     }
 
 }
@@ -114,14 +142,78 @@ class Player {
     }
 }
 
-class Entity {
+var test = false;
+class Rocks {
+    constructor(GameArea_ID, RocksArr, RandomRockSpeed) {
+        var RandomSpeedIndex = Math.round(Math.random() * 10);
+        var TheRockID = randomString(100);
+        this.speed = RandomRockSpeed[RandomSpeedIndex];
+        this.RockID = TheRockID;
 
+        this.playground = document.getElementById(GameArea_ID)
+
+        this.HTMLRock = document.createElement('div');
+        this.HTMLRock.id = TheRockID;
+        this.HTMLRock.className = "item";
+        this.HTMLRock.style.top = 500;
+
+        this.top = 0;
+        this.left = 0;
+
+        this.playground.appendChild(this.HTMLRock);
+
+        this.Pos = new Pos(0, 0);
+        RocksArr.push
+    }
+
+    Move() {
+        this.Pos.X = this.Pos.X + this.speed;
+        this.Pos.Y = this.Pos.Y + this.speed;
+        this.HTMLRock.style.top = this.Pos.X + 'px';
+        this.HTMLRock.style.left = this.Pos.Y + 'px';
+    }
+
+    Destroy(TheBullet) {
+        this.HTMLRock.remove();
+        Arraycutout(RocksArr, this);
+        TheBullet.bullet.remove();
+        Arraycutout(BulletsArr, TheBullet)
+        ScoreObj.UpdateScore(5);
+        return;
+    }
+
+    isHit() {
+        BulletsArr.forEach(OneBullet => {
+            if (OneBullet.Pos.X > this.Pos.X) {
+                var DiffX = Math.abs(OneBullet.Pos.X - this.Pos.X);
+            } else {
+                var DiffX = Math.abs(this.Pos.X - OneBullet.Pos.X);
+            }
+            if (OneBullet.Pos.Y > this.Pos.Y) {
+                var DiffY = Math.abs(OneBullet.Pos.Y - this.Pos.Y);
+            } else {
+                var DiffY = Math.abs(this.Pos.Y - OneBullet.Pos.Y);
+            }
+
+            if (!test) {
+                console.log("DiffX: " + DiffX + " and DiffY: " + DiffY)
+                console.table(OneBullet);
+                test = true;
+            }
+            if (DiffX < 15 && DiffY < 5) {
+                this.Destroy(OneBullet);
+                return;
+            }
+        })
+    }
 }
 
 var ThePlayer = new Player(4);
 var BulletsArr = [];
+var RocksArr = [];
 
 var ScoreObj = new Score('gameArea', 'score', 0, 0);
+RocksArr.push(new Rocks('gameArea', RocksArr, RandomRockSpeed));
 
 var OldH, OldW;
 var Resize = setInterval(() => {
@@ -218,7 +310,12 @@ moveObj = () => {
     ThePlayer.Move();
 
     BulletsArr.forEach((instanceBullet) => {
-        instanceBullet.move_bullet();
+        instanceBullet.Move();
+    })
+
+    RocksArr.forEach(instanceRock => {
+        //instanceRock.Move();
+        instanceRock.isHit();
     })
 }
 
@@ -243,9 +340,13 @@ init = () => {
     if (h > w) {
         GameArea.css("height", w + 'px');
         GameArea.css("width", w + 'px');
+        ScoreObj.Pos.X = (w / 2 + (250 * (w / 1200)));
+        ScoreObj.Pos.Y = (w * -1) + 50;
     } else {
         GameArea.css("height", h + 'px');
         GameArea.css("width", h + 'px');
+        ScoreObj.Pos.X = (h / 2 + 250);
+        ScoreObj.Pos.Y = (h * -1) + 50;
     }
     OldH = h;
     OldW = w;
