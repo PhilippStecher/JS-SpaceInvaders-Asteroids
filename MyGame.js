@@ -453,3 +453,9 @@ init = () => {
 window.onload = () => {
     init();
 }
+
+//TODO
+//Player collision with rock
+//rock spawns
+//rock respawn when not destroyed
+//lvl up when all rocks destroyed
