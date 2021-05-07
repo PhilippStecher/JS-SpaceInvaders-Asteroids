@@ -1,9 +1,12 @@
 //GLOBALS
 var IS_CHROME = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-var RandomRockSpeed = [0.2, 0.3, 0.4, 0.5, 0.55, 0.65, 0.6, 0.7, 0.8, 0.9];
+var RandomRockSpeed = [0.3, 0.4, 0.5, 0.55, 0.65, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5];
+var RockLeftOrRight = ["L", "R"];
+var RockUpOrDown = ["U", "D"];
 var RockSpawns = [[0, 0], [0, 0]];
 var LVL = 0;
 var SpeedForLVL = [4, 6, 8, 10];
+var RocksPerLVL = [0, 5, 7, 10, 13, 17, 100];
 
 Arraycutout = (array, WholeRockObj) => {
     var returnarray = [];
@@ -52,7 +55,7 @@ class Score {
         this.HTMLscore.className = "flex"
 
     }
-    UpdateScore(Points) {
+    AddPoints(Points) {
         this.PlayerScore = this.PlayerScore + Points
     }
 }
@@ -76,6 +79,32 @@ class Bullet {
 
         this.playground = document.getElementById('gameArea');
         this.playground.appendChild(this.bullet);
+    }
+
+    Destroy() {
+        this.bullet.remove();
+        BulletsArr = Arraycutout(BulletsArr, this)
+        return;
+
+    }
+
+    isOutOfFocus() {
+        if (this.bullet.offsetTop < 0) {
+            this.Destroy()
+            return;
+        }
+        if (this.bullet.offsetTop > (this.bullet.offsetParent.offsetHeight - this.bullet.offsetHeight)) {
+            this.Destroy()
+            return;
+        }
+        if (this.bullet.offsetLeft < 0) {
+            this.Destroy()
+            return;
+        }
+        if (this.bullet.offsetLeft > (this.bullet.offsetParent.offsetWidth - this.bullet.offsetWidth)) {
+            this.Destroy()
+            return;
+        }
     }
 
     Move() {
@@ -140,15 +169,23 @@ class Player {
             BulletCooldown = 0;
         }
     }
+
+    Collosion() {
+
+    }
 }
 
-var test = false;
 class Rocks {
     constructor(GameArea_ID, RocksArr, RandomRockSpeed) {
-        var RandomSpeedIndex = Math.round(Math.random() * 10);
+        var RandomSpeedIndexX = Math.round(Math.random() * 15);
+        var RandomSpeedIndexY = Math.round(Math.random() * 15);
         var TheRockID = randomString(100);
-        this.speed = RandomRockSpeed[RandomSpeedIndex];
         this.RockID = TheRockID;
+
+        this.speedX = RandomRockSpeed[RandomSpeedIndexX];
+        this.speedY = RandomRockSpeed[RandomSpeedIndexY];
+        this.MoveLR = RockLeftOrRight[Math.round(Math.random() * 1)]
+        this.MoveUD = RockUpOrDown[Math.round(Math.random() * 1)]
 
         this.playground = document.getElementById(GameArea_ID)
 
@@ -167,19 +204,54 @@ class Rocks {
     }
 
     Move() {
-        this.Pos.X = this.Pos.X + this.speed;
-        this.Pos.Y = this.Pos.Y + this.speed;
-        this.HTMLRock.style.top = this.Pos.X + 'px';
-        this.HTMLRock.style.left = this.Pos.Y + 'px';
+        if (this.MoveLR == "L") {
+            this.Pos.X = this.Pos.X - this.speedX;
+            this.HTMLRock.style.top = this.Pos.X + 'px';
+        } else if (this.MoveLR == "R") {
+            this.Pos.X = this.Pos.X + this.speedX;
+            this.HTMLRock.style.top = this.Pos.X + 'px';
+        }
+
+        if (this.MoveUD == "U") {
+            this.Pos.Y = this.Pos.Y - this.speedY;
+            this.HTMLRock.style.left = this.Pos.Y + 'px';
+        } else if (this.MoveUD == "D") {
+            this.Pos.Y = this.Pos.Y + this.speedY;
+            this.HTMLRock.style.left = this.Pos.Y + 'px';
+        }
     }
 
     Destroy(TheBullet) {
         this.HTMLRock.remove();
-        Arraycutout(RocksArr, this);
-        TheBullet.bullet.remove();
-        Arraycutout(BulletsArr, TheBullet)
-        ScoreObj.UpdateScore(5);
+        RocksArr = Arraycutout(RocksArr, this);
+        if (TheBullet != undefined) {
+            console.log("Rock hit")
+            TheBullet.bullet.remove();
+            BulletsArr = Arraycutout(BulletsArr, TheBullet)
+            ScoreObj.AddPoints(5);
+            return;
+        }
+        console.log("Rock out of focus")
         return;
+    }
+
+    isOutOfFocus() {
+        if (this.HTMLRock.offsetTop < 0) {
+            this.Destroy()
+            return;
+        }
+        if (this.HTMLRock.offsetTop > (this.HTMLRock.offsetParent.offsetHeight - this.HTMLRock.offsetHeight)) {
+            this.Destroy()
+            return;
+        }
+        if (this.HTMLRock.offsetLeft < 0) {
+            this.Destroy()
+            return;
+        }
+        if (this.HTMLRock.offsetLeft > (this.HTMLRock.offsetParent.offsetWidth - this.HTMLRock.offsetWidth)) {
+            this.Destroy()
+            return;
+        }
     }
 
     isHit() {
@@ -195,12 +267,7 @@ class Rocks {
                 var DiffY = Math.abs(this.Pos.Y - OneBullet.Pos.Y);
             }
 
-            if (!test) {
-                console.log("DiffX: " + DiffX + " and DiffY: " + DiffY)
-                console.table(OneBullet);
-                test = true;
-            }
-            if (DiffX < 15 && DiffY < 5) {
+            if (DiffX <= 15 && DiffY <= 15) {
                 this.Destroy(OneBullet);
                 return;
             }
@@ -213,7 +280,11 @@ var BulletsArr = [];
 var RocksArr = [];
 
 var ScoreObj = new Score('gameArea', 'score', 0, 0);
+/* RocksArr.push(new Rocks('gameArea', RocksArr, RandomRockSpeed));
 RocksArr.push(new Rocks('gameArea', RocksArr, RandomRockSpeed));
+RocksArr.push(new Rocks('gameArea', RocksArr, RandomRockSpeed));
+RocksArr.push(new Rocks('gameArea', RocksArr, RandomRockSpeed)); */
+
 
 var OldH, OldW;
 var Resize = setInterval(() => {
@@ -307,25 +378,52 @@ ScoreBoard = () => {
 }
 
 moveObj = () => {
-    ThePlayer.Move();
-
     BulletsArr.forEach((instanceBullet) => {
         instanceBullet.Move();
     })
-
     RocksArr.forEach(instanceRock => {
-        //instanceRock.Move();
-        instanceRock.isHit();
+        instanceRock.Move();
     })
 }
 
+OutOfFocusCheck = () => {
+    BulletsArr.forEach((instanceBullet) => {
+        instanceBullet.isOutOfFocus();
+    })
+    RocksArr.forEach(instanceRock => {
+        instanceRock.isOutOfFocus();
+    })
+}
+
+var isBulletOnRock = setInterval(() => {
+    RocksArr.forEach(instanceRock => {
+        instanceRock.isHit();
+    })
+}, 33)
+
 main = () => {
-    moveObj()
+    ThePlayer.Move();
     ThePlayer.Shoot();
+    ThePlayer.Collosion();
 
     /* Bullet Cooldown */
     BulletCooldown++;
-    ScoreBoard()
+
+    /* if (RocksArr.length < ScoreObj.PlayerScore) {
+        RocksArr.push(new Rocks('gameArea', RocksArr, RandomRockSpeed));
+    } */
+
+    if (RocksArr.length == 0) {
+        LVL++;
+        for (var x = 0; x < RocksPerLVL[LVL]; x++) {
+            RocksArr.push(new Rocks('gameArea', RocksArr, RandomRockSpeed));
+        }
+    }
+
+    moveObj();
+    ScoreBoard();
+    OutOfFocusCheck();
+
     requestAnimationFrame(main);
 }
 
