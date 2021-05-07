@@ -66,9 +66,8 @@ var DefaultBulletSpeed = 5;
 var BulletCooldown = 30;
 var BulledCooldownWanted = 30;
 class Bullet {
-    constructor(BulletsArr) {
-        this.Pos = new Pos(ThePlayer.Pos.X, ThePlayer.Pos.Y)
-        this.BulletsArr = BulletsArr;
+    constructor() {
+        this.Pos = new Pos(ThePlayer.Pos.X, ThePlayer.Pos.Y + 7)
         this.bullet = document.createElement('div');
         this.bullet.className = 'bullet';
 
@@ -110,6 +109,7 @@ class Bullet {
     Move() {
         this.Pos.Y = this.Pos.Y - this.speed;
         this.bullet.style.top = this.Pos.Y + 'px';
+        return;
     }
 
 }
@@ -165,7 +165,7 @@ class Player {
 
     Shoot() {
         if (this.is_shooting && BulletCooldown >= BulledCooldownWanted) {
-            BulletsArr.push(new Bullet(BulletsArr));
+            BulletsArr.push(new Bullet());
             BulletCooldown = 0;
         }
     }
@@ -267,7 +267,7 @@ class Rocks {
                 var DiffY = Math.abs(this.Pos.Y - OneBullet.Pos.Y);
             }
 
-            if (DiffX <= 15 && DiffY <= 15) {
+            if (DiffX <= 25 && DiffY <= 25) {
                 this.Destroy(OneBullet);
                 return;
             }
@@ -345,7 +345,6 @@ $(window).keyup(Key => {
     if (KeyPress == "XXX") {
         return;
     }
-    //console.log("Keyreleased: " + KeyPress)
     if (KeyPress == "Space") {
         //Shoot
         ThePlayer.is_shooting = false;
@@ -395,13 +394,37 @@ OutOfFocusCheck = () => {
     })
 }
 
-var isBulletOnRock = setInterval(() => {
-    RocksArr.forEach(instanceRock => {
+/* setInterval(() => {
+    for (var instanceRock of RocksArr) {
         instanceRock.isHit();
-    })
-}, 33)
+    }
+}, 33) */
+
+var test = setInterval(() => {
+    if (BulletsArr.length != 0) {
+        console.table(ThePlayer)
+    }
+}, 2000)
+
+DetectBulletHitRock = () => {
+
+    for (let i = 0; i < RocksArr.length; i++) {
+        obj1 = RocksArr[i];
+        for (let j = i + 1; j < BulletsArr.length; j++) {
+            obj2 = BulletsArr[j];
+
+            // Compare object1 with object2
+            var DiffX = Math.abs(obj1.Pos.X - obj2.Pos.X);
+            var DiffY = Math.abs(obj1.Pos.Y - obj2.Pos.Y);
+            //console.log(DiffX, DiffY)
+        }
+    }
+}
 
 main = () => {
+
+    DetectBulletHitRock();
+
     ThePlayer.Move();
     ThePlayer.Shoot();
     ThePlayer.Collosion();
@@ -455,7 +478,7 @@ window.onload = () => {
 }
 
 //TODO
-//Player collision with rock
+//Player collision with rock / Lives = 3
 //rock spawns
 //rock respawn when not destroyed
 //lvl up when all rocks destroyed
