@@ -28,14 +28,15 @@ class HTMLSound {
     }
 
     PlaySound() {
+        this.HTMLsoundArea.volume = this.vol;
         this.HTMLsoundArea.play();
     }
 }
 
-var ShootSound = new HTMLSound("shoot", 1);
-var HaveDestroyedSound = new HTMLSound("HaveDestroyed", 1);
-var GotDestroyedSound = new HTMLSound("GotDestroyed", 1);
-var GameOverSound = new HTMLSound("GameOver", 1);
+var ShootSound = new HTMLSound("shoot", 0.3);
+var HaveDestroyedSound = new HTMLSound("HaveDestroyed", 0.3);
+var GotDestroyedSound = new HTMLSound("GotDestroyed", 0.3);
+var GameOverSound = new HTMLSound("GameOver", 0.3);
 //#endregion
 
 //#region Important Functions
