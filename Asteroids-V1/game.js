@@ -1,6 +1,6 @@
 //#region Globals
-var LVL = 0;
-var RocksPerLVL = [0, 1, 5, 7, 10, 13, 17, 22, 25, 30, 100];
+var LVL = 10;
+var RocksPerLVL = [0, 1, 5, 7, 10, 13, 17, 22, 25, 30, 100, 200, 300, 400, 500, 700, 1000];
 
 var RockLeftOrRight = ["L", "R"];
 var RockUpOrDown = ["D", "U"];
@@ -315,7 +315,7 @@ class Rocks {
 
     Spawn() {
         /* CoordsX Random */
-        var PosXHolder = (this.playground.offsetWidth / 2);
+        var PosXHolder = (this.playground.offsetWidth / 2) - 15;
         var XPrositivOrNegativ = (Math.round(Math.random() * 1) == 0) ? -1 : 1;
         var XCoord = randomNumber(0, PosXHolder);
 
@@ -439,7 +439,7 @@ $(window).keydown(Key => {
     if (KeyPress == "ArrRight") {
         //MoveRight
         ThePlayer.MoveRight = true;
-        
+
         var Pobj = ThePlayer.HTMLplayer
         var degree = 45
         Pobj.style.webkitTransform = 'rotate(' + degree + 'deg)';
@@ -472,7 +472,7 @@ $(window).keyup(Key => {
         //MoveLeft
         ThePlayer.MoveLeft = false;
 
-        var Pobj = ThePlayer.HTMLplayer 
+        var Pobj = ThePlayer.HTMLplayer
         var degree = 0
         Pobj.style.webkitTransform = 'rotate(' + degree + 'deg)';
         Pobj.style.MozTransform = 'rotate(' + degree + 'deg)';
@@ -567,17 +567,29 @@ ScoreBoard = () => {
 
 //#region Main
 main = () => {
-    SetSPboolToScreen()
-    SetLevelToScreen()
+    ScoreBoard();
+    SetSPboolToScreen();
+    SetLevelToScreen();
     if (ThePlayer.lives != OldLifes)
         SetLifesToScreen();
 
     ThePlayer.Move();
+    OutOfFocusCheck();
+
+    if (ThePlayer.SpawnProtection) {
+        requestAnimationFrame(main);
+        return;
+    }
+        
+
     ThePlayer.Shoot();
     ThePlayer.Collision();
 
     /* Bullet Cooldown */
     BulletCooldown++;
+
+    
+    moveObj();
 
     if (RocksArr.length == 0) {
         LVL++;
@@ -587,11 +599,6 @@ main = () => {
             RocksArr.push(newRock);
         }
     }
-
-    OutOfFocusCheck();
-    moveObj();
-    ScoreBoard();
-
     requestAnimationFrame(main);
 }
 
