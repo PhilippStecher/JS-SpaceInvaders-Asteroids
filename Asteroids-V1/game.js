@@ -427,10 +427,26 @@ $(window).keydown(Key => {
     if (KeyPress == "ArrLeft") {
         //MoveLeft
         ThePlayer.MoveLeft = true;
+
+        var Pobj = ThePlayer.HTMLplayer
+        var degree = -45
+        Pobj.style.webkitTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.MozTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.msTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.OTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.transform = 'rotate(' + degree + 'deg)';
     }
     if (KeyPress == "ArrRight") {
         //MoveRight
         ThePlayer.MoveRight = true;
+        
+        var Pobj = ThePlayer.HTMLplayer
+        var degree = 45
+        Pobj.style.webkitTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.MozTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.msTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.OTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.transform = 'rotate(' + degree + 'deg)';
     }
     if (KeyPress == "ArrUp") {
         //MoveUp
@@ -455,10 +471,26 @@ $(window).keyup(Key => {
     if (KeyPress == "ArrLeft") {
         //MoveLeft
         ThePlayer.MoveLeft = false;
+
+        var Pobj = ThePlayer.HTMLplayer 
+        var degree = 0
+        Pobj.style.webkitTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.MozTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.msTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.OTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.transform = 'rotate(' + degree + 'deg)';
     }
     if (KeyPress == "ArrRight") {
         //MoveRight
         ThePlayer.MoveRight = false;
+
+        var Pobj = ThePlayer.HTMLplayer
+        var degree = 0
+        Pobj.style.webkitTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.MozTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.msTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.OTransform = 'rotate(' + degree + 'deg)';
+        Pobj.style.transform = 'rotate(' + degree + 'deg)';
     }
     if (KeyPress == "ArrUp") {
         //MoveUp
