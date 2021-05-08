@@ -1,7 +1,7 @@
 //#region Globals
 var IsStartet = false;
-var LVL = 10;
-var RocksPerLVL = [0, 1, 5, 7, 10, 13, 17, 22, 25, 30, 100, 200, 300, 400, 500, 700, 1000];
+var LVL = 0;
+var RocksPerLVL = [0, 1, 5, 7, 10, 13, 17, 22, 25, 30, 33, 37, 40, 43, 100, 200, 300, 400, 500, 700, 1000];
 
 var RockLeftOrRight = ["L", "R"];
 var RockUpOrDown = ["D", "U"];
@@ -585,7 +585,7 @@ main = () => {
         requestAnimationFrame(main);
         return;
     }
-        
+
 
     ThePlayer.Shoot();
     ThePlayer.Collision();
@@ -593,7 +593,7 @@ main = () => {
     /* Bullet Cooldown */
     BulletCooldown++;
 
-    
+
     moveObj();
 
     if (RocksArr.length == 0) {
