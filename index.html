@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,9 +9,16 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <title>Space Invaders</title>
 </head>
+
 <body class='flex' id='here'>
     <link href='https://fonts.googleapis.com/css?family=Play:400,700' rel='stylesheet' type='text/css'>
-    <div id="gameArea"></div>
+    <div id="gameArea">
+        <div id="lives" class="flex">Lifes: /</div>
+        <div id="SpawnProtection" class="flex">Spawnprotection: /</div>
+    </div>
     <script src='./MyGame.js'></script>
+    <!-- <canvas id="game-canvas"></canvas>
+    <script src="game.js"></script> -->
 </body>
+
 </html>
