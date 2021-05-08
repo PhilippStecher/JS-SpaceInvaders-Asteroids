@@ -1,0 +1,144 @@
+* {
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+body,
+html {
+    background-color: #222;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+div {
+    display: block;
+    margin: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    image-rendering: optimizeSpeed;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    background-color: red;
+}
+
+.flex {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+#gameArea {
+    align-items: flex-start;
+    background-color: blue;
+    /* Kindelemente aßßerhalb des Elternelements werden versteckt */
+    background-image: url(./img/Background1.jpg);
+    background-repeat: repeat;
+    background-size: auto;
+    background-position-y: 100%;
+    animation: BACKGROUND_animation 7000s linear infinite;
+    border: 1px solid white;
+}
+
+@keyframes BACKGROUND_animation {
+    from {
+        /* background-position-y: 0px; */
+    }
+
+    to {
+        background-position-y: 500000px;
+    }
+}
+
+.item {
+    width: 25px;
+    height: 25px;
+    color: white;
+    font-weight: bold;
+    position: absolute;
+    background-image: url("./img/asteroid50.png");
+    background-size: 100%;
+    background-color: transparent;
+}
+
+#HTMLplayer {
+    z-index: 20;
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: 75%;
+    background-image: url("./img/shooter.png");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-color: transparent;
+}
+
+.bullet {
+    position: absolute;
+    width: 5px;
+    height: 15px;
+    background-image: url("./img/projektil.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+#score {
+    position: relative;
+    float: right;
+    height: 30px;
+    width: 150px;
+    background-color: rgba(0, 0, 0, 0.521);
+    z-index: 999;
+    color: white;
+    border: 1px solid whitesmoke;
+    margin-top: 10px;
+    margin-right: -150px;
+}
+
+#level {
+    position: relative;
+    float: right;
+    height: 30px;
+    width: 150px;
+    background-color: rgba(0, 0, 0, 0.521);
+    z-index: 999;
+    color: white;
+    border: 1px solid whitesmoke;
+    margin-top: 50px;
+    margin-right: 10px;
+}
+
+#lives {
+    position: relative;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.521);
+    height: 30px;
+    width: 150px;
+    z-index: 999;
+    float: left;
+    margin-top: 10px;
+    margin-left: 10px;
+    border: 1px solid whitesmoke;
+}
+
+#SpawnProtection {
+    position: relative;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.521);
+    height: 30px;
+    width: 150px;
+    z-index: 999;
+    margin-top: 50px;
+    margin-left: -150px;
+    float: left;
+    border: 1px solid whitesmoke;
+}

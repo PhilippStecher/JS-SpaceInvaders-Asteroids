@@ -1,15 +1,13 @@
-//GLOBALS
-var IS_CHROME = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-var RandomRockSpeed = [0.7, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.5];
+//#region Globals
+var LVL = 0;
+var RocksPerLVL = [0, 1, 5, 7, 10, 13, 17, 22, 25, 30, 100];
+
 var RockLeftOrRight = ["L", "R"];
 var RockUpOrDown = ["D", "U"];
-var RockSpawns = [[0, 0], [0, 0]];
-var LVL = 0;
-var SpeedForLVL = [4, 6, 8, 10];
-var RocksPerLVL = [0, 1, 5, 7, 10, 13, 17, 22, 25, 30, 100];
 var RockType = ["small", "medium", "large"];
+//#endregion
 
-//#region Audios
+//#region Soundeffects
 const SoundsArr = {
     "shoot": "audio/asteroids-ship-shoot.wav",
     "HaveDestroyed": "audio/asteroids-destroy.wav",
@@ -40,6 +38,25 @@ var GotDestroyedSound = new HTMLSound("GotDestroyed", 1);
 var GameOverSound = new HTMLSound("GameOver", 1);
 //#endregion
 
+//#region Important Functions
+var OldH, OldW;
+var Resize = setInterval(() => {
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    if (OldH != h || OldW != w) {
+        var GameArea = $("#gameArea");
+        if (h > w) {
+            GameArea.css("height", w + 'px');
+            GameArea.css("width", w + 'px');
+        } else {
+            GameArea.css("height", h + 'px');
+            GameArea.css("width", h + 'px');
+        }
+        OldH = h;
+        OldW = w;
+    }
+}, 33);
+
 Arraycutout = (array, WholeRockObj) => {
     var returnarray = [];
     for (var x = 0; x < array.length; x++) {
@@ -48,9 +65,6 @@ Arraycutout = (array, WholeRockObj) => {
         }
     }
     return returnarray;
-
-    return false;
-
 };
 
 function randomString(length) {
@@ -64,9 +78,22 @@ function randomString(length) {
 }
 
 function randomNumber(min, max) {
-    return Math.random() * (max - min) + min;
+    return Math.floor(Math.random() * (max - min) + min);
 }
 
+GoodHeight = () => {
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+
+    if (h > w) {
+        return (w * 0.75)
+    } else {
+        return (h * 0.75)
+    }
+}
+//#endregion
+
+//#region Classconstructions
 class Pos {
     constructor(X, Y) {
         this.X = X;
@@ -89,7 +116,6 @@ class Score {
     }
 }
 
-/* Weapon options */
 var BulletSpeed = 5;
 var DefaultBulletSpeed = 5;
 var BulletCooldown = 30;
@@ -113,7 +139,6 @@ class Bullet {
         this.bullet.remove();
         BulletsArr = Arraycutout(BulletsArr, this)
         return;
-
     }
 
     isOutOfFocus() {
@@ -143,20 +168,6 @@ class Bullet {
 
 }
 
-GoodHeight = () => {
-    var w = window.innerWidth;
-    var h = window.innerHeight;
-
-    // calculate the scale factor to keep a correct aspect ratio
-    if (h > w) {
-        return (w * 0.75)
-    } else {
-        return (h * 0.75)
-    }
-}
-
-var Gravity = false;
-var GravityForce = 2;
 class Player {
     constructor(speed, lifes) {
         this.Pos = new Pos(0, GoodHeight());
@@ -198,11 +209,6 @@ class Player {
             this.SpawnProtection = false;
             this.Pos.X += this.speed;
             this.HTMLplayer.style.left = this.Pos.X + 'px';
-        }
-        if (Gravity && this.HTMLplayer.offsetTop < (this.HTMLplayer.offsetParent.offsetHeight - this.HTMLplayer.offsetHeight)) {
-            this.SpawnProtection = false;
-            this.Pos.Y += GravityForce;
-            this.HTMLplayer.style.top = this.Pos.Y + 'px';
         }
     }
 
@@ -277,9 +283,10 @@ class Player {
     }
 }
 
+var RandomRockSpeed = [0.7, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.5];
 class Rocks {
     constructor(GameArea_ID, RocksArr, RandomRockSpeed, size = 1337) {
-        var RandomSpeedIndexX =Math.floor(randomNumber(0, RandomRockSpeed.length))
+        var RandomSpeedIndexX = Math.floor(randomNumber(0, RandomRockSpeed.length))
         var RandomSpeedIndexY = Math.floor(randomNumber(7, RandomRockSpeed.length));
 
         this.speedX = RandomRockSpeed[RandomSpeedIndexX];
@@ -313,7 +320,6 @@ class Rocks {
 
         /* CoordsY Random */
         var PosYHolder = (this.playground.offsetHeight * -1);
-        console.log(PosYHolder)
         this.Pos = new Pos((XCoord * XPrositivOrNegativ), PosYHolder - randomNumber(30, 120))
 
     }
@@ -351,22 +357,16 @@ class Rocks {
     }
 
     isOutOfFocus() {
-        /* if (this.HTMLRock.offsetTop < 0) {
-            this.Destroy()
-            return;
-        } */
         if (this.HTMLRock.offsetTop > (this.HTMLRock.offsetParent.offsetHeight - this.HTMLRock.offsetHeight)) {
             this.Destroy()
             return;
         }
         if (this.HTMLRock.offsetLeft < 0) {
-            //this.Destroy()
             this.MoveLR = (this.MoveLR == RockLeftOrRight[0]) ? RockLeftOrRight[1] : (this.MoveLR == RockLeftOrRight[1]) ? RockLeftOrRight[0] : this.Destroy();
             this.Move()
             return;
         }
         if (this.HTMLRock.offsetLeft > (this.HTMLRock.offsetParent.offsetWidth - this.HTMLRock.offsetWidth)) {
-            //this.Destroy()
             this.MoveLR = (this.MoveLR == RockLeftOrRight[0]) ? RockLeftOrRight[1] : (this.MoveLR == RockLeftOrRight[1]) ? RockLeftOrRight[0] : this.Destroy();
             this.Move()
             return;
@@ -396,76 +396,20 @@ class Rocks {
                     HaveDestroyedSound.PlaySound();
                     this.Destroy(OneBullet);
                     return;
-                } else {
-                    //this.HTMLRock.style.backgroundColor = "orange";
-                    return;
-                }
+                } return;
             })
-        } else {
-            //this.HTMLRock.style.backgroundColor = "blue";
-            return;
-        }
-        return;
-    }
-
-    PaintOnBulletCollission() {
-        if (BulletsArr.length > 0) {
-            BulletsArr.forEach(OneBullet => {
-                if (OneBullet == undefined)
-                    return;
-
-                if (OneBullet.bullet.offsetTop > this.HTMLRock.offsetTop) {
-                    var DiffY = Math.abs(OneBullet.bullet.offsetTop - this.HTMLRock.offsetTop);
-                } else {
-                    var DiffY = Math.abs(this.HTMLRock.offsetTop - OneBullet.bullet.offsetTop);
-                }
-
-                if (OneBullet.bullet.offsetLeft > this.HTMLRock.offsetLeft) {
-                    var DiffX = Math.abs(OneBullet.bullet.offsetLeft - (this.HTMLRock.offsetLeft + 10));
-                } else {
-                    var DiffX = Math.abs(this.HTMLRock.offsetLeft - (OneBullet.bullet.offsetLeft - 10));
-                }
-
-                if (DiffX <= 15 && DiffY <= 15) {
-                    this.HTMLRock.style.backgroundColor = "red";
-                    this.Destroy(OneBullet);
-                    return;
-                } else {
-                    //this.HTMLRock.style.backgroundColor = "orange";
-                    return;
-                }
-            })
-        } else {
-            this.HTMLRock.style.backgroundColor = "blue";
-            return;
         }
         return;
     }
 }
+//#endregion
 
 var ThePlayer = new Player(4, 3);
 var ScoreObj = new Score('gameArea', 'score', 0, 0);
 var BulletsArr = [];
 var RocksArr = [];
 
-var OldH, OldW;
-var Resize = setInterval(() => {
-    var w = window.innerWidth;
-    var h = window.innerHeight;
-    if (OldH != h || OldW != w) {
-        var GameArea = $("#gameArea");
-        if (h > w) {
-            GameArea.css("height", w + 'px');
-            GameArea.css("width", w + 'px');
-        } else {
-            GameArea.css("height", h + 'px');
-            GameArea.css("width", h + 'px');
-        }
-        OldH = h;
-        OldW = w;
-    }
-}, 33);
-
+//#region Keypress
 $(window).keydown(Key => {
     KeyCode = Key.keyCode;
     var KeyPress = (KeyCode == 32) ? "Space" : (KeyCode == 37 || KeyCode == 65) ? "ArrLeft" : (KeyCode == 39 || KeyCode == 68) ? "ArrRight" : (KeyCode == 38 || KeyCode == 87) ? "ArrUp" : (KeyCode == 83 || KeyCode == 40) ? "ArrDown" : "XXX";
@@ -500,9 +444,9 @@ $(window).keydown(Key => {
 $(window).keyup(Key => {
     KeyCode = Key.keyCode;
     var KeyPress = (KeyCode == 32) ? "Space" : (KeyCode == 37 || KeyCode == 65) ? "ArrLeft" : (KeyCode == 39 || KeyCode == 68) ? "ArrRight" : (KeyCode == 38 || KeyCode == 87) ? "ArrUp" : (KeyCode == 83 || KeyCode == 40) ? "ArrDown" : "XXX";
-    if (KeyPress == "XXX") {
+    if (KeyPress == "XXX")
         return;
-    }
+
     if (KeyPress == "Space") {
         //Shoot
         ThePlayer.is_shooting = false;
@@ -524,19 +468,9 @@ $(window).keyup(Key => {
         ThePlayer.MoveDown = false;
     }
 })
+//#endregion
 
-var OldPlayerscore;
-ScoreBoard = () => {
-    if (OldPlayerscore == ScoreObj.PlayerScore)
-        return;
-
-    if (ScoreObj.PlayerScore > 999999999999) {
-        ScoreObj.HTMLscore.style.width = "200px";
-    }
-    ScoreObj.HTMLscore.innerText = 'Score: ' + ScoreObj.PlayerScore;
-    OldPlayerscore = ScoreObj.PlayerScore;
-}
-
+//#region ClassOptions
 moveObj = () => {
     BulletsArr.forEach((instanceBullet) => {
         instanceBullet.Move();
@@ -563,7 +497,9 @@ setInterval(() => {
         instanceRock.isHit();
     }
 }, 1)
+//#endregion
 
+//#region Drawing
 var HolderLifes = document.getElementById('lives');
 var HolderSpawnP = document.getElementById('SpawnProtection')
 var HolderLevel = document.getElementById('level')
@@ -583,12 +519,21 @@ SetLevelToScreen = () => {
     }
 }
 
+var OldPlayerscore;
+ScoreBoard = () => {
+    if (OldPlayerscore == ScoreObj.PlayerScore)
+        return;
 
+    if (ScoreObj.PlayerScore > 999999999999) {
+        ScoreObj.HTMLscore.style.width = "200px";
+    }
+    ScoreObj.HTMLscore.innerText = 'Score: ' + ScoreObj.PlayerScore;
+    OldPlayerscore = ScoreObj.PlayerScore;
+}
+//#endregion
+
+//#region Main
 main = () => {
-    /* if (!ThePlayer.SpawnProtection) {
-        if (HolderLifes.innerText != ("Spawnprotection: " + ThePlayer.SpawnProtection))
-            
-    } */
     SetSPboolToScreen()
     SetLevelToScreen()
     if (ThePlayer.lives != OldLifes)
@@ -600,10 +545,6 @@ main = () => {
 
     /* Bullet Cooldown */
     BulletCooldown++;
-
-    /* if (RocksArr.length < ScoreObj.PlayerScore) {
-        RocksArr.push(new Rocks('gameArea', RocksArr, RandomRockSpeed));
-    } */
 
     if (RocksArr.length == 0) {
         LVL++;
@@ -622,14 +563,15 @@ main = () => {
 }
 
 main();
+//#endregion
 
+//#region INIT
 init = () => {
     SetSPboolToScreen();
     SetLifesToScreen();
     var w = window.innerWidth;
     var h = window.innerHeight;
 
-    // calculate the scale factor to keep a correct aspect ratio
     var GameArea = $("#gameArea");
     if (h > w) {
         GameArea.css("height", w + 'px');
@@ -644,12 +586,5 @@ init = () => {
 
 window.onload = () => {
     init();
-    console.log(randomNumber(5, RandomRockSpeed.length))
-    //console.log(randomNumber(((holder * -1) + 25), ((holder) - 25)))
 }
-
-//TODO
-//rock spawns
-//rock respawn when not destroyed
-//lvl up when all rocks destroyed
-//add different rock sizes
+//#endregion
