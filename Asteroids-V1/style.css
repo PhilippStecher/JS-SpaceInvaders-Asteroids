@@ -79,7 +79,7 @@ div {
     background-image: url("./img/shooter.png");
     background-size: 100% 100%;
     background-repeat: no-repeat;
-    background-color: transparent;
+    background-color: transparent;  
 }
 
 .bullet {
@@ -141,4 +141,14 @@ div {
     margin-left: -150px;
     float: left;
     border: 1px solid whitesmoke;
+}
+
+#startTheGame {
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(0, 0, 0, 0.74);
+    color: white;
+    z-index: 999999;
+    font-size: 300%;
+    font-family: Roboto, "Helvetica Neue", Arial, Helvetica;
 }

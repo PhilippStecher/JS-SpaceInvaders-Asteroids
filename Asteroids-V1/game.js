@@ -1,4 +1,5 @@
 //#region Globals
+var IsStartet = false;
 var LVL = 10;
 var RocksPerLVL = [0, 1, 5, 7, 10, 13, 17, 22, 25, 30, 100, 200, 300, 400, 500, 700, 1000];
 
@@ -413,13 +414,17 @@ var RocksArr = [];
 //#region Keypress
 $(window).keydown(Key => {
     KeyCode = Key.keyCode;
-    var KeyPress = (KeyCode == 32) ? "Space" : (KeyCode == 37 || KeyCode == 65) ? "ArrLeft" : (KeyCode == 39 || KeyCode == 68) ? "ArrRight" : (KeyCode == 38 || KeyCode == 87) ? "ArrUp" : (KeyCode == 83 || KeyCode == 40) ? "ArrDown" : "XXX";
+    var KeyPress = (KeyCode == 32) ? "Space" : (KeyCode == 37 || KeyCode == 65) ? "ArrLeft" : (KeyCode == 39 || KeyCode == 68) ? "ArrRight" : (KeyCode == 38 || KeyCode == 87) ? "ArrUp" : (KeyCode == 83 || KeyCode == 40) ? "ArrDown" : (KeyCode == 13) ? "Enter" : "XXX";
     if (KeyPress == "XXX") {
         //console.log("Unknown key")
         //console.log(Key.keyCode);
         return;
     }
     //console.log("Key pressed: " + KeyPress)
+    if (KeyPress == "Enter") {
+        IsStartet = true;
+        document.getElementById('startTheGame').remove()
+    }
     if (KeyPress == "Space") {
         //Shoot
         ThePlayer.is_shooting = true;
@@ -576,7 +581,7 @@ main = () => {
     ThePlayer.Move();
     OutOfFocusCheck();
 
-    if (ThePlayer.SpawnProtection) {
+    if (!IsStartet) {
         requestAnimationFrame(main);
         return;
     }
