@@ -45,7 +45,7 @@ div {
     background-repeat: repeat;
     background-size: auto;
     background-position-y: 100%;
-    animation: BACKGROUND_animation 7w000s linear infinite;
+    animation: BACKGROUND_animation 7000s linear infinite;
     border: 1px solid white;
 }
 
@@ -62,11 +62,12 @@ div {
 .item {
     width: 25px;
     height: 25px;
-    /*   */
     color: white;
     font-weight: bold;
     position: absolute;
-
+    background-image: url("./img/asteroid50.png");
+    background-size: 100%;
+    background-color: transparent;
 }
 
 #HTMLplayer {
@@ -100,6 +101,19 @@ div {
     color: white;
     border: 1px solid whitesmoke;
     margin-top: 10px;
+    margin-right: -150px;
+}
+
+#level {
+    position: relative;
+    float: right;
+    height: 30px;
+    width: 150px;
+    background-color: rgba(0, 0, 0, 0.521);
+    z-index: 999;
+    color: white;
+    border: 1px solid whitesmoke;
+    margin-top: 50px;
     margin-right: 10px;
 }
 

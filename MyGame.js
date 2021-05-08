@@ -1,12 +1,44 @@
 //GLOBALS
 var IS_CHROME = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-var RandomRockSpeed = [0.3, 0.4, 0.5, 0.55, 0.65, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5];
+var RandomRockSpeed = [0.7, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.5];
 var RockLeftOrRight = ["L", "R"];
-var RockUpOrDown = ["U", "D"];
+var RockUpOrDown = ["D", "U"];
 var RockSpawns = [[0, 0], [0, 0]];
 var LVL = 0;
 var SpeedForLVL = [4, 6, 8, 10];
-var RocksPerLVL = [0, 5, 7, 10, 13, 17, 100];
+var RocksPerLVL = [0, 1, 5, 7, 10, 13, 17, 22, 25, 30, 100];
+var RockType = ["small", "medium", "large"];
+
+//#region Audios
+const SoundsArr = {
+    "shoot": "audio/asteroids-ship-shoot.wav",
+    "HaveDestroyed": "audio/asteroids-destroy.wav",
+    "GotDestroyed": "audio/asteroids-ship-explode.wav",
+    "GameOver": "audio/asteroids-ship-dies.mp3"
+}
+
+class HTMLSound {
+    constructor(Soundname, volume) {
+        this.vol = volume;
+        this.SoundName = Soundname;
+        this.path = SoundsArr[Soundname];
+
+        this.HTMLsoundArea = document.createElement("audio")
+        this.HTMLsoundArea.src = this.path
+        this.HTMLsoundArea.id = this.SoundName
+        document.body.appendChild(this.HTMLsoundArea)
+    }
+
+    PlaySound() {
+        this.HTMLsoundArea.play();
+    }
+}
+
+var ShootSound = new HTMLSound("shoot", 1);
+var HaveDestroyedSound = new HTMLSound("HaveDestroyed", 1);
+var GotDestroyedSound = new HTMLSound("GotDestroyed", 1);
+var GameOverSound = new HTMLSound("GameOver", 1);
+//#endregion
 
 Arraycutout = (array, WholeRockObj) => {
     var returnarray = [];
@@ -126,10 +158,10 @@ GoodHeight = () => {
 var Gravity = false;
 var GravityForce = 2;
 class Player {
-    constructor(speed) {
+    constructor(speed, lifes) {
         this.Pos = new Pos(0, GoodHeight());
         this.speed = speed;
-        this.lives = 3;
+        this.lives = lifes;
 
         this.HTMLplayer = document.createElement('div');
         this.HTMLplayer.id = "HTMLplayer";
@@ -176,6 +208,7 @@ class Player {
 
     Shoot() {
         if (this.is_shooting && BulletCooldown >= BulledCooldownWanted) {
+            ShootSound.PlaySound();
             this.SpawnProtection = false;
             BulletsArr.push(new Bullet());
             BulletCooldown = 0;
@@ -198,12 +231,15 @@ class Player {
             return;
 
         this.lives -= 1;
+
         this.ResetPos();
         if (this.lives == 0) {
+            GameOverSound.PlaySound();
             window.alert("All lives lost!");
             window.location.reload();
+            return;
         }
-
+        GotDestroyedSound.PlaySound();
     }
 
     Collision() {
@@ -231,13 +267,10 @@ class Player {
                     OneRock.HTMLRock.style.backgroundColor = "red";
                     this.Death();
                     return;
-                } else {
-                    //this.HTMLRock.style.backgroundColor = "orange";
-                    return;
                 }
+                return;
             })
         } else {
-            //OneRock.HTMLRock.style.backgroundColor = "blue";
             return;
         }
         return;
@@ -245,45 +278,61 @@ class Player {
 }
 
 class Rocks {
-    constructor(GameArea_ID, RocksArr, RandomRockSpeed) {
-        var RandomSpeedIndexX = Math.round(Math.random() * 15);
-        var RandomSpeedIndexY = Math.round(Math.random() * 15);
-        var TheRockID = randomString(100);
-        this.RockID = TheRockID;
+    constructor(GameArea_ID, RocksArr, RandomRockSpeed, size = 1337) {
+        var RandomSpeedIndexX =Math.floor(randomNumber(0, RandomRockSpeed.length))
+        var RandomSpeedIndexY = Math.floor(randomNumber(7, RandomRockSpeed.length));
 
         this.speedX = RandomRockSpeed[RandomSpeedIndexX];
         this.speedY = RandomRockSpeed[RandomSpeedIndexY];
         this.MoveLR = RockLeftOrRight[Math.round(Math.random() * 1)]
-        this.MoveUD = RockUpOrDown[Math.round(Math.random() * 1)]
+        this.MoveUD = RockUpOrDown[0]//Only Down for V1
 
         this.playground = document.getElementById(GameArea_ID)
 
         this.HTMLRock = document.createElement('div');
+        var TheRockID = randomString(100);
+        this.RockID = TheRockID;
         this.HTMLRock.id = TheRockID;
         this.HTMLRock.className = "item";
-        this.HTMLRock.style.top = 500;
-
         this.playground.appendChild(this.HTMLRock);
 
         this.Pos = new Pos(0, 0);
-        RocksArr.push
+
+        if (size == 1337) {
+            this.size = RockType[randomNumber(0, RockType.length)];//generate new random rock
+        } else {
+            this.size = size;
+        }
+    }
+
+    Spawn() {
+        /* CoordsX Random */
+        var PosXHolder = (this.playground.offsetWidth / 2);
+        var XPrositivOrNegativ = (Math.round(Math.random() * 1) == 0) ? -1 : 1;
+        var XCoord = randomNumber(0, PosXHolder);
+
+        /* CoordsY Random */
+        var PosYHolder = (this.playground.offsetHeight * -1);
+        console.log(PosYHolder)
+        this.Pos = new Pos((XCoord * XPrositivOrNegativ), PosYHolder - randomNumber(30, 120))
+
     }
 
     Move() {
-        if (this.MoveLR == "L") {
-            this.Pos.X = this.Pos.X - this.speedX;
-            this.HTMLRock.style.top = this.Pos.X + 'px';
-        } else if (this.MoveLR == "R") {
-            this.Pos.X = this.Pos.X + this.speedX;
-            this.HTMLRock.style.top = this.Pos.X + 'px';
-        }
-
         if (this.MoveUD == "U") {
             this.Pos.Y = this.Pos.Y - this.speedY;
-            this.HTMLRock.style.left = this.Pos.Y + 'px';
+            this.HTMLRock.style.top = this.Pos.Y + 'px';
         } else if (this.MoveUD == "D") {
             this.Pos.Y = this.Pos.Y + this.speedY;
-            this.HTMLRock.style.left = this.Pos.Y + 'px';
+            this.HTMLRock.style.top = this.Pos.Y + 'px';
+        }
+
+        if (this.MoveLR == "L") {
+            this.Pos.X = this.Pos.X - this.speedX;
+            this.HTMLRock.style.left = this.Pos.X + 'px';
+        } else if (this.MoveLR == "R") {
+            this.Pos.X = this.Pos.X + this.speedX;
+            this.HTMLRock.style.left = this.Pos.X + 'px';
         }
     }
 
@@ -302,20 +351,24 @@ class Rocks {
     }
 
     isOutOfFocus() {
-        if (this.HTMLRock.offsetTop < 0) {
+        /* if (this.HTMLRock.offsetTop < 0) {
             this.Destroy()
             return;
-        }
+        } */
         if (this.HTMLRock.offsetTop > (this.HTMLRock.offsetParent.offsetHeight - this.HTMLRock.offsetHeight)) {
             this.Destroy()
             return;
         }
         if (this.HTMLRock.offsetLeft < 0) {
-            this.Destroy()
+            //this.Destroy()
+            this.MoveLR = (this.MoveLR == RockLeftOrRight[0]) ? RockLeftOrRight[1] : (this.MoveLR == RockLeftOrRight[1]) ? RockLeftOrRight[0] : this.Destroy();
+            this.Move()
             return;
         }
         if (this.HTMLRock.offsetLeft > (this.HTMLRock.offsetParent.offsetWidth - this.HTMLRock.offsetWidth)) {
-            this.Destroy()
+            //this.Destroy()
+            this.MoveLR = (this.MoveLR == RockLeftOrRight[0]) ? RockLeftOrRight[1] : (this.MoveLR == RockLeftOrRight[1]) ? RockLeftOrRight[0] : this.Destroy();
+            this.Move()
             return;
         }
     }
@@ -340,6 +393,7 @@ class Rocks {
 
                 if (DiffX <= 15 && DiffY <= 15) {
                     this.HTMLRock.style.backgroundColor = "red";
+                    HaveDestroyedSound.PlaySound();
                     this.Destroy(OneBullet);
                     return;
                 } else {
@@ -348,7 +402,7 @@ class Rocks {
                 }
             })
         } else {
-            this.HTMLRock.style.backgroundColor = "blue";
+            //this.HTMLRock.style.backgroundColor = "blue";
             return;
         }
         return;
@@ -389,7 +443,7 @@ class Rocks {
     }
 }
 
-var ThePlayer = new Player(4);
+var ThePlayer = new Player(4, 3);
 var ScoreObj = new Score('gameArea', 'score', 0, 0);
 var BulletsArr = [];
 var RocksArr = [];
@@ -512,6 +566,7 @@ setInterval(() => {
 
 var HolderLifes = document.getElementById('lives');
 var HolderSpawnP = document.getElementById('SpawnProtection')
+var HolderLevel = document.getElementById('level')
 SetSPboolToScreen = () => {
     HolderSpawnP.innerText = "Spawnprotection: " + ThePlayer.SpawnProtection
 }
@@ -520,13 +575,22 @@ SetLifesToScreen = () => {
     HolderLifes.innerText = "Lifes: " + ThePlayer.lives;
     OldLifes = ThePlayer.lives;
 }
+var LevelBefore;
+SetLevelToScreen = () => {
+    if (LevelBefore != LVL) {
+        HolderLevel.innerText = "Level: " + LVL
+        LevelBefore = LVL
+    }
+}
 
 
 main = () => {
-    if (!ThePlayer.SpawnProtection) {
+    /* if (!ThePlayer.SpawnProtection) {
         if (HolderLifes.innerText != ("Spawnprotection: " + ThePlayer.SpawnProtection))
-            SetSPboolToScreen()
-    }
+            
+    } */
+    SetSPboolToScreen()
+    SetLevelToScreen()
     if (ThePlayer.lives != OldLifes)
         SetLifesToScreen();
 
@@ -544,13 +608,15 @@ main = () => {
     if (RocksArr.length == 0) {
         LVL++;
         for (var x = 0; x < RocksPerLVL[LVL]; x++) {
-            RocksArr.push(new Rocks('gameArea', RocksArr, RandomRockSpeed));
+            var newRock = new Rocks('gameArea', RocksArr, RandomRockSpeed, 1337);
+            newRock.Spawn();
+            RocksArr.push(newRock);
         }
     }
 
+    OutOfFocusCheck();
     moveObj();
     ScoreBoard();
-    OutOfFocusCheck();
 
     requestAnimationFrame(main);
 }
@@ -578,9 +644,12 @@ init = () => {
 
 window.onload = () => {
     init();
+    console.log(randomNumber(5, RandomRockSpeed.length))
+    //console.log(randomNumber(((holder * -1) + 25), ((holder) - 25)))
 }
 
 //TODO
 //rock spawns
 //rock respawn when not destroyed
 //lvl up when all rocks destroyed
+//add different rock sizes
