@@ -404,7 +404,7 @@ class Rocks {
 }
 //#endregion
 
-var ThePlayer = new Player(4, 3);
+var ThePlayer = new Player(5, 3);
 var ScoreObj = new Score('gameArea', 'score', 0, 0);
 var BulletsArr = [];
 var RocksArr = [];
